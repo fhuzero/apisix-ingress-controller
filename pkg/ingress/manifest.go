@@ -108,35 +108,72 @@ func diffStreamRoutes(olds, news []*apisixv1.StreamRoute) (added, updated, delet
 	return
 }
 
+func diffSsls(olds, news []*apisixv1.Ssl) (added, updated, deleted []*apisixv1.Ssl) {
+	if olds == nil {
+		return news, nil, nil
+	}
+	if news == nil {
+		return nil, nil, olds
+	}
+
+	oldMap := make(map[string]*apisixv1.Ssl, len(olds))
+	newMap := make(map[string]*apisixv1.Ssl, len(news))
+	for _, ssl := range olds {
+		oldMap[ssl.ID] = ssl
+	}
+	for _, ssl := range news {
+		newMap[ssl.ID] = ssl
+	}
+
+	for _, ssl := range news {
+		if or, ok := oldMap[ssl.ID]; !ok {
+			added = append(added, ssl)
+		} else if !reflect.DeepEqual(or, ssl) {
+			updated = append(updated, ssl)
+		}
+	}
+	for _, ssl := range olds {
+		if _, ok := newMap[ssl.ID]; !ok {
+			deleted = append(deleted, ssl)
+		}
+	}
+	return
+}
+
 type manifest struct {
 	routes       []*apisixv1.Route
 	upstreams    []*apisixv1.Upstream
 	streamRoutes []*apisixv1.StreamRoute
+	ssls         []*apisixv1.Ssl
 }
 
 func (m *manifest) diff(om *manifest) (added, updated, deleted *manifest) {
 	ar, ur, dr := diffRoutes(om.routes, m.routes)
 	au, uu, du := diffUpstreams(om.upstreams, m.upstreams)
 	asr, usr, dsr := diffStreamRoutes(om.streamRoutes, m.streamRoutes)
-	if ar != nil || au != nil || asr != nil {
+	assl, ussl, dssl := diffSsls(om.ssls, m.ssls)
+	if ar != nil || au != nil || asr != nil || assl != nil {
 		added = &manifest{
 			routes:       ar,
 			upstreams:    au,
 			streamRoutes: asr,
+			ssls:         assl,
 		}
 	}
-	if ur != nil || uu != nil || usr != nil {
+	if ur != nil || uu != nil || usr != nil || ussl != nil {
 		updated = &manifest{
 			routes:       ur,
 			upstreams:    uu,
 			streamRoutes: usr,
+			ssls:         ussl,
 		}
 	}
-	if dr != nil || du != nil || dsr != nil {
+	if dr != nil || du != nil || dsr != nil || dssl != nil {
 		deleted = &manifest{
 			routes:       dr,
 			upstreams:    du,
 			streamRoutes: dsr,
+			ssls:         dssl,
 		}
 	}
 	return
@@ -170,6 +207,18 @@ func (c *Controller) syncManifests(ctx context.Context, added, updated, deleted 
 				}
 			}
 		}
+		for _, ssl := range deleted.ssls {
+			if err := c.apisix.Cluster(clusterName).SSL().Delete(ctx, ssl); err != nil {
+				// Upstream might be referenced by other routes.
+				if err != cache.ErrStillInUse {
+					merr = multierror.Append(merr, err)
+				} else {
+					log.Infow("ssl was referenced by other routes",
+						zap.String("ssl_id", ssl.ID),
+					)
+				}
+			}
+		}
 	}
 	if added != nil {
 		// Should create upstreams firstly due to the dependencies.
@@ -188,6 +237,11 @@ func (c *Controller) syncManifests(ctx context.Context, added, updated, deleted 
 				merr = multierror.Append(merr, err)
 			}
 		}
+		for _, ssl := range added.ssls {
+			if _, err := c.apisix.Cluster(clusterName).SSL().Create(ctx, ssl); err != nil {
+				merr = multierror.Append(merr, err)
+			}
+		}
 	}
 	if updated != nil {
 		for _, r := range updated.upstreams {
@@ -202,6 +256,11 @@ func (c *Controller) syncManifests(ctx context.Context, added, updated, deleted 
 		}
 		for _, sr := range updated.streamRoutes {
 			if _, err := c.apisix.Cluster(clusterName).StreamRoute().Create(ctx, sr); err != nil {
+				merr = multierror.Append(merr, err)
+			}
+		}
+		for _, ssl := range updated.ssls {
+			if _, err := c.apisix.Cluster(clusterName).SSL().Create(ctx, ssl); err != nil {
 				merr = multierror.Append(merr, err)
 			}
 		}
