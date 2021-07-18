@@ -123,7 +123,6 @@ type Controller struct {
 	apisixTlsController           *apisixTlsController
 	apisixClusterConfigController *apisixClusterConfigController
 
-
 	apisixConsumerController *apisixConsumerController
 	knativeIngressController *knativeIngressController
 }

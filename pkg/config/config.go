@@ -111,14 +111,14 @@ func NewDefaultConfig() *Config {
 		HTTPListen:      ":8080",
 		EnableProfiling: true,
 		Kubernetes: KubernetesConfig{
-			Kubeconfig:          "", // Use in-cluster configurations.
-			ResyncInterval:      types.TimeDuration{Duration: 6 * time.Hour},
-			AppNamespaces:       []string{v1.NamespaceAll},
-			ElectionID:          IngressAPISIXLeader,
-			IngressClass:        IngressClass,
-			IngressVersion:      IngressNetworkingV1,
-			ApisixRouteVersion:  ApisixRouteV2alpha1,
-			WatchEndpointSlices: false,
+			Kubeconfig:            "", // Use in-cluster configurations.
+			ResyncInterval:        types.TimeDuration{Duration: 6 * time.Hour},
+			AppNamespaces:         []string{v1.NamespaceAll},
+			ElectionID:            IngressAPISIXLeader,
+			IngressClass:          IngressClass,
+			IngressVersion:        IngressNetworkingV1,
+			ApisixRouteVersion:    ApisixRouteV2alpha1,
+			WatchEndpointSlices:   false,
 			KnativeIngressVersion: KnativeIngressNetworkingV1alpha1,
 		},
 	}

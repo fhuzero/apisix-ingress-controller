@@ -213,6 +213,13 @@ func (in *RewriteConfig) DeepCopyInto(out *RewriteConfig) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.RewriteHeaders != nil {
+		in, out := &in.RewriteHeaders, &out.RewriteHeaders
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	return
 }
 

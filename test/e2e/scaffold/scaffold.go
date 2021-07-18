@@ -31,7 +31,6 @@ import (
 	"time"
 
 	"github.com/apache/apisix-ingress-controller/pkg/kube"
-	"github.com/gavv/httpexpect/v2"
 	"github.com/gruntwork-io/terratest/modules/k8s"
 	"github.com/gruntwork-io/terratest/modules/testing"
 	"github.com/onsi/ginkgo"

@@ -77,8 +77,8 @@ e2e-test: ginkgo-check push-images-to-kind
 ### knative-integration-test: Run Knative integration test cases
 .PHONY: knative-integration-test
 knative-integration-test:
-	./utils/setup.sh  # Builds and deploys APISIX ingress controller locally in a "kind" cluster with knative, forwards the local 8080 to APISIX ingress controller/APISIX
-	./test/e2e-kind.sh
+	./test/knative_support/setup.sh  # Builds and deploys APISIX ingress controller locally in a "kind" cluster with knative, forwards the local 8080 to APISIX ingress controller/APISIX
+	./test/knative_support/e2e-kind.sh
 
 .PHONY: ginkgo-check
 ginkgo-check:
