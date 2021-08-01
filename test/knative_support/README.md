@@ -17,7 +17,7 @@
 #
 -->
 
-# Conformance test for APISIX Ingress Controller
+# Conformance and E2E test for APISIX Ingress Controller
 
 ## Dependencies
 
@@ -41,14 +41,23 @@ The script installs necessary utilities, Golang, ko, KinD, and Helm. You can als
 
 ## Clone repo
 
-Suppose the project directory is _~/go/src/fhuzero/apisix-ingress-controller_,
-execute the following command to clone the repo and build APISIX Ingress Controller.
+Suppose GOPATH is _{$HOME}/go/src_.
+
+1. Suppose the project directory is _{$HOME}/go/src/fhuzero/apisix-ingress-controller_, 
+   execute the following command to clone the repo and build APISIX Ingress Controller.
 
 ```shell
 mkdir -p ~/go/src/fhuzero && cd ~/go/src/fhuzero && git clone https://github.com/fhuzero/apisix-ingress-controller.git
 cd ~/go/src/fhuzero/apisix-ingress-controller && git switch feat/knative-support
-chmod +x utils/setup.sh test/upload-test-images.sh test/e2e-kind.sh test/conformance/kn-conformance-setup.sh
+chmod +x test/knative_support/setup.sh test/knative_support/upload-test-images.sh test/knative_support/e2e-kind.sh test/knative_support/kn-conformance-setup.sh
 make build
+```
+
+2. Clone knative/networking repo.
+   The directory _knative/networking/test/test_images_ will be used in _upload-test-images.sh_.
+
+```shell
+mkdir -p ~/go/src/knative && cd ~/go/src/knative && git clone https://github.com/knative/networking.git
 ```
 
 ## Run conformance test

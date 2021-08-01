@@ -24,7 +24,7 @@ function upload_test_images() {
     # Script needs to be executed from repo root
     cd "$( dirname "$0")/../.."
 #    local image_dir="$(find "${GOPATH}/pkg/mod/knative.dev" -type d -name "networking*" | head -n1)/test/test_images"
-    local image_dir="tmpvendor/knative.dev/networking/test/test_images"
+    local image_dir="{$HOME}/go/src/knative/networking/test/test_images"
     local docker_tag=$1
     local tag_option=""
     if [ -n "${docker_tag}" ]; then
