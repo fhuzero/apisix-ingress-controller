@@ -24,7 +24,7 @@ APISIX_NAMESPACE=ingress-apisix
 
 export KO_DOCKER_REPO=kind.local
 export KIND_CLUSTER_NAME="ingress-apisix-knative"
-. ./upload-test-images.sh
+./test/knative_support/upload-test-images.sh
 
 echo ">> Setup test resources"
 # TODO: check whether .yaml files under test/config need to be revised
@@ -38,6 +38,6 @@ export "GATEWAY_NAMESPACE_OVERRIDE=${APISIX_NAMESPACE}"
 
 echo ">> Running conformance tests"
 # timeout is 1m to failfast since the test always timed out
-go test -count=1 -short -timeout=5m -tags=e2e -test.v ./conformance/... ./e2e/... \
+go test -count=1 -short -timeout=4m -tags=e2e -test.v ./test/knative_support/conformance/... ./test/knative_support/e2e/... \
   --ingressendpoint=${NODE_IP} \
   --ingressClass=apisix
